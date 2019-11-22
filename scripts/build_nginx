@@ -41,6 +41,15 @@ echo "Downloading $zlib_url"
 echo "Downloading $uuid4_url"
 (cd nginx-${NGINX_VERSION} && curl -L $uuid4_url | tar xvz )
 
+echo "Graceful shutdown on term, terminate on bogus signal"
+SIGNAL_FILE="src/core/ngx_config.h"
+(
+ cd nginx-${NGINX_VERSION} \
+ && sed ${SIGNAL_FILE} -i -e "s/#define NGX_SHUTDOWN_SIGNAL.*/#define NGX_SHUTDOWN_SIGNAL      TERM/g" -e "s/#define NGX_TERMINATE_SIGNAL.*/#define NGX_TERMINATE_SIGNAL     CONT/g" \
+ && echo "Signals defined as" \
+ && grep "NGX.*SIGNAL" ${SIGNAL_FILE}
+)
+
 (
   cd nginx-${NGINX_VERSION}
   ./configure \
